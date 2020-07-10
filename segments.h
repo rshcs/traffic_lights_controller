@@ -16,12 +16,12 @@ class SegmentsClass
  private:
 
 
-	 //PORTA values according to segment control transistors
+	 //PORTA values associates with segment control transistors
 	 int8_t seg_a[3] = { 4, 16 };
 	 int8_t seg_b[3] = { 2, 1 };
 	 int8_t seg_c[3] = { 32, 8 };
 
-	 // 0 to 10
+	 // 0 to 10 numbers
 	 uint8_t nums[11] = { 0x6F, 0x48, 0x3E, 0x5E, 0x59, 0x57, 0x77, 0x4C, 0x7F, 0x5F };
 	 uint32_t disp_tmr = 0;
 	 boolean seg_select = 0;
