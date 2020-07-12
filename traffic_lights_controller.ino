@@ -5,7 +5,7 @@
 #define MUX_DLY 3000
 
 uint16_t cd_delay = 1000;
-int t1 = 8, t2 = 8, t3 = 8, t4 = 8, t5 = 8, t6 = 8;
+int t1 = 3, t2 = 4, t3 = 5, t4 = 8, t5 = 8, t6 = 8;
 int8_t inc = 0, cd_state = 1, location = 0, mux_state;
 uint32_t cycle_timer = 0, ser_rd_tmr = 0, cd_tmr, mux_tmr = 0;
 
@@ -50,26 +50,23 @@ void loop()
 {
 	
 	inReader();
-	cycle_update(CYCLE_TIME);
-	//seg.display_on(cd_var, cd_var, cd_var);
-	//lights.state_config(t1, t2, t3);
-	//seg_out(27, 1);
-	//PORTA = porta_val[3];
-
-	display(27);
-
+	//cycle_update(CYCLE_TIME);
+	
+	//display(78, 91, 23);
+	//segments_test(100);
+	//lights_test(2000);
 	/*
 	if (cd_state == 1)
 	{
-		seg.display_on(cd_var, cd_var, cd_var + t2);
+		display(cd_var, cd_var, cd_var + t2, cd_state - 1);
 	}
 	else if (cd_state == 2)
 	{
-		seg.display_on(cd_var, cd_var, cd_var);
+		display(cd_var, cd_var, cd_var, cd_state - 1);
 	}
 	else if (cd_state == 3)
 	{
-		seg.display_on(cd_var + t1, cd_var + t1, cd_var);
+		display(cd_var + t1, cd_var + t1, cd_var, cd_state - 1);
 	}
 	*/
 	//count_down_tmr();
@@ -143,8 +140,11 @@ uint16_t count_down_tmr()
 	{
 		cd_tmr = millis();
 		cd_var--;
-		//Serial.println(cd_var);
-		//Serial.println(cd_tmr);
+		/*
+		Serial.print(cd_var);
+		Serial.print("|");
+		Serial.println(cd_tmr);
+		*/
 		cd_delay = 1000;
 	}
 	if (cd_var < 1 )
@@ -223,22 +223,45 @@ uint8_t seg_out(uint8_t in_val, boolean place)
 	}
 }
 
-void display(uint16_t in_val)
+void display(int ta, int tb, int tc, int8_t state_in)
 {
-	if (micros() - mux_tmr > 300000)
+	if (micros() - mux_tmr > MUX_DLY)
 	{
 		mux_tmr = micros();
+		
+		if (location == 0)
+		{
+			seg_out(ta, num_place);
+			PORTL = portl_val[state_in][location];
+			
+		}
+		else if (location == 1)
+		{
+			seg_out(tb, num_place);
+			PORTL = portl_val[state_in][location];
+			
+		}
+		else if(location == 2)
+		{
+			seg_out(tc, num_place);
+			PORTL = portl_val[state_in][location];
+			
+			
+		}
 
-		seg_out(in_val, num_place);
-		PORTA = porta_val[location];
-		/*
-		Serial.print(num_place);
-		Serial.print("|");
-		Serial.print(porta_val[location]);
-		Serial.println();
-		*/
+		if (num_place)
+		{
+			PORTA = porta_val[location];
+			
+		}
+		else
+		{
+			PORTA = porta_val[location + 3];
+			
+		}
+
 		location++;
-		if (location > 2) // 0 1 2
+		if (location > 2)
 		{
 			location = 0;
 			num_place = !num_place;
