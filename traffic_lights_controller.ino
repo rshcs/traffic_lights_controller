@@ -6,10 +6,11 @@
 
 uint16_t cd_delay = 1000;
 int t1 = 3, t2 = 4, t3 = 5, t4 = 8, t5 = 8, t6 = 8;
-int8_t inc = 0, cd_state = 1, location = 0, mux_state;
+int8_t inc = 0, cd_state = 0, location = 0, mux_state;
 uint32_t cycle_timer = 0, ser_rd_tmr = 0, cd_tmr, mux_tmr = 0;
 
 int cd_var = t1;
+int cd_var_last;
 
 boolean ser_avl = 0, num_place = 0;
 
@@ -55,21 +56,36 @@ void loop()
 	//display(78, 91, 23);
 	//segments_test(100);
 	//lights_test(2000);
-	/*
-	if (cd_state == 1)
+	
+	if (cd_state == 0)
 	{
-		display(cd_var, cd_var, cd_var + t2, cd_state - 1);
+		display(cd_var, cd_var, cd_var + t2, cd_state);
+		
+	}
+	else if (cd_state == 1) //<====
+	{
+		display(cd_var_last, cd_var_last, cd_var_last + t2, cd_state);
 	}
 	else if (cd_state == 2)
 	{
-		display(cd_var, cd_var, cd_var, cd_state - 1);
+		display(cd_var, cd_var, cd_var, cd_state);
+		
 	}
-	else if (cd_state == 3)
+	else if (cd_state == 3)//<====
 	{
-		display(cd_var + t1, cd_var + t1, cd_var, cd_state - 1);
+		display(cd_var_last, cd_var_last, cd_var_last, cd_state);
 	}
-	*/
-	//count_down_tmr();
+	else if (cd_state == 4)
+	{
+		display(cd_var + t1, cd_var + t1, cd_var, cd_state);
+
+	}
+	else if (cd_state == 5)//<====
+	{
+		display(cd_var_last + t1, cd_var_last + t1, cd_var_last, cd_state);
+	}
+
+	count_down_tmr();
 }
 
 void inReader()
@@ -141,35 +157,56 @@ uint16_t count_down_tmr()
 		cd_tmr = millis();
 		cd_var--;
 		/*
-		Serial.print(cd_var);
+		Serial.print(cd_state);
 		Serial.print("|");
-		Serial.println(cd_tmr);
+		Serial.print(cd_var);
+		Serial.println();
 		*/
 		cd_delay = 1000;
 	}
 	if (cd_var < 1 )
 	{
-		if (cd_state == 1)
+		//Serial.println(cd_state);
+		if (cd_state == 0)
 		{
-			cd_var = t2 ;
+			cd_var_last = cd_var;
+			cd_state = 1;
+			cd_var = 2;
+			
+		}
+		else if (cd_state == 1)
+		{
+			
+			cd_var = t2;
 			cd_state = 2;
-			cd_delay = 3000;
 			
 		}
 		else if (cd_state == 2)
 		{
-			cd_var = t3 ;
-			cd_state = 2;
-			cd_delay = 3000;
+			cd_var_last = cd_var;
+			cd_state = 3;
+			cd_var = 2;
+			
 			
 		}
 		else if (cd_state == 3)
 		{
-			cd_var = t1 ;
-			cd_state = 1;
-			cd_delay = 3000;
+			cd_var = t3;
+			cd_state = 4;
 			
-		}	
+		}
+		else if (cd_state == 4)
+		{
+			cd_var_last = cd_var;
+			cd_state = 5;
+			cd_var = 2;
+			
+		}
+		else if (cd_state == 5)
+		{
+			cd_var = t1;
+			cd_state = 0;
+		}
 	}
 }
 
