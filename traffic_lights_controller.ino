@@ -3,6 +3,8 @@
 #define CYCLE_TIME 30
 #define SER_RD_TME 20
 #define MUX_DLY 3000
+#define CD_DLY 1000
+#define YELLOW_DLY 2
 
 uint16_t cd_delay = 1000;
 int t1 = 3, t2 = 4, t3 = 5, t4 = 8, t5 = 8, t6 = 8;
@@ -53,39 +55,8 @@ void loop()
 	inReader();
 	//cycle_update(CYCLE_TIME);
 	
-	//display(78, 91, 23);
-	//segments_test(100);
-	//lights_test(2000);
-	
-	if (cd_state == 0)
-	{
-		display(cd_var, cd_var, cd_var + t2, cd_state);
-		
-	}
-	else if (cd_state == 1) //<====
-	{
-		display(cd_var_last, cd_var_last, cd_var_last + t2, cd_state);
-	}
-	else if (cd_state == 2)
-	{
-		display(cd_var, cd_var, cd_var, cd_state);
-		
-	}
-	else if (cd_state == 3)//<====
-	{
-		display(cd_var_last, cd_var_last, cd_var_last, cd_state);
-	}
-	else if (cd_state == 4)
-	{
-		display(cd_var + t1, cd_var + t1, cd_var, cd_state);
+	display_all();
 
-	}
-	else if (cd_state == 5)//<====
-	{
-		display(cd_var_last + t1, cd_var_last + t1, cd_var_last, cd_state);
-	}
-
-	count_down_tmr();
 }
 
 void inReader()
@@ -162,45 +133,50 @@ uint16_t count_down_tmr()
 		Serial.print(cd_var);
 		Serial.println();
 		*/
-		cd_delay = 1000;
+		cd_delay = CD_DLY;
 	}
-	if (cd_var < 1 )
+	
+}
+
+void cd_state_config()
+{
+	if (cd_var < 1)
 	{
 		//Serial.println(cd_state);
 		if (cd_state == 0)
 		{
 			cd_var_last = cd_var;
 			cd_state = 1;
-			cd_var = 2;
-			
+			cd_var = YELLOW_DLY;
+
 		}
 		else if (cd_state == 1)
 		{
-			
+
 			cd_var = t2;
 			cd_state = 2;
-			
+
 		}
 		else if (cd_state == 2)
 		{
 			cd_var_last = cd_var;
 			cd_state = 3;
-			cd_var = 2;
-			
-			
+			cd_var = YELLOW_DLY;
+
+
 		}
 		else if (cd_state == 3)
 		{
 			cd_var = t3;
 			cd_state = 4;
-			
+
 		}
 		else if (cd_state == 4)
 		{
 			cd_var_last = cd_var;
 			cd_state = 5;
-			cd_var = 2;
-			
+			cd_var = YELLOW_DLY;
+
 		}
 		else if (cd_state == 5)
 		{
@@ -210,13 +186,14 @@ uint16_t count_down_tmr()
 	}
 }
 
-
+/*
 void ports_config(uint8_t pl_val, uint8_t pc_val, uint8_t pa_val)
 {
 	PORTL = pl_val;
 	PORTC = pc_val;
 	PORTA = pa_val;
 }
+*/
 
 void lights_test(uint16_t inDly)
 {
@@ -304,4 +281,38 @@ void display(int ta, int tb, int tc, int8_t state_in)
 			num_place = !num_place;
 		}
 	}
+}
+
+void display_all()
+{
+	if (cd_state == 0)
+	{
+		display(cd_var, cd_var, cd_var + t2, cd_state);
+
+	}
+	else if (cd_state == 1) //<==== transition state
+	{
+		display(cd_var_last, cd_var_last, cd_var_last + t2, cd_state);
+	}
+	else if (cd_state == 2)
+	{
+		display(cd_var, cd_var, cd_var, cd_state);
+
+	}
+	else if (cd_state == 3)//<==== transition state
+	{
+		display(cd_var_last, cd_var_last, cd_var_last, cd_state);
+	}
+	else if (cd_state == 4)
+	{
+		display(cd_var + t1, cd_var + t1, cd_var, cd_state);
+
+	}
+	else if (cd_state == 5)//<==== transition state
+	{
+		display(cd_var_last + t1, cd_var_last + t1, cd_var_last, cd_state);
+	}
+
+	count_down_tmr();
+	cd_state_config();
 }
