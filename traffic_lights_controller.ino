@@ -6,7 +6,7 @@
 #define CD_DLY 1000
 #define YELLOW_DLY 2
 
-uint16_t cd_delay = 1000;
+//uint16_t cd_delay = 1000;
 int t1 = 3, t2 = 4, t3 = 5, t4 = 8, t5 = 8, t6 = 8;
 int8_t inc = 0, cd_state = 0, location = 0, mux_state;
 uint32_t cycle_timer = 0, ser_rd_tmr = 0, cd_tmr, mux_tmr = 0;
@@ -51,89 +51,35 @@ void setup()
 
 void loop()
 {
-	
-	inReader();
-	//cycle_update(CYCLE_TIME);
-	
+
 	display_all();
-
-}
-
-void inReader()
-{
-	if (inc == 1)
-	{
-		t4 = inStringReader().toInt();
-		inc++;
-	}
-	else if (inc == 3)
-	{
-		t5 = inStringReader().toInt();
-		inc++;
-	}
-	else if (inc == 5)
-	{
-		t6 = inStringReader().toInt();
-		inc = 0;
-	}
-	read_delay(20);
+	ser_reader();
 	
 }
 
-String inStringReader()
+void ser_reader()
 {
-	String inStr = "";
-	while (Serial.available() > 0)
+	if (Serial.available() > 5)
 	{
-		inStr += Serial.readString();
-	}
-	return inStr;
-}
-
-void read_delay(uint16_t delay_tme)
-{
-	if (Serial.available() && !ser_avl)
-	{
-		ser_rd_tmr = millis();
-		ser_avl = 1;
+		t4 = Serial.readStringUntil('\n').toInt(); // read until NL character and convert it to integer
+		t5 = Serial.readStringUntil('\n').toInt();
+		t6 = Serial.readStringUntil('\n').toInt();
 		
-	}
-	if (ser_avl && (millis() - ser_rd_tmr > delay_tme))
-	{
-		//Serial.println(inc);
-		ser_avl = 0;
-		inc++;
-		
-	}
-}
-
-void cycle_update(uint16_t upd_time) // update t1, t2, t3 for every entered value (in seconds)
-{
-	
-	if (millis() - cycle_timer > upd_time * 1000)
-	{
-		cycle_timer = millis();
-		t1 = t4;
-		t2 = t5;
-		t3 = t6;
-
-		//Serial.println("cyc tme");
+		while (Serial.available()) // clear excessive data received 
+		{
+			Serial.read();
+		}
 	}
 }
 
 uint16_t count_down_tmr()
 {
-	if (millis() - cd_tmr > cd_delay)
+	if (millis() - cd_tmr > CD_DLY)
 	{
 		cd_tmr = millis();
 		cd_var--;
-		/*
-		Serial.print(cd_state);
-		Serial.print("|");
-		Serial.print(cd_var);
-		Serial.println();
-		*/
-		cd_delay = CD_DLY;
+	
+		//cd_delay = CD_DLY;
 	}
 	
 }
@@ -142,17 +88,14 @@ void cd_state_config()
 {
 	if (cd_var < 1)
 	{
-		//Serial.println(cd_state);
 		if (cd_state == 0)
 		{
 			cd_var_last = cd_var;
 			cd_state = 1;
 			cd_var = YELLOW_DLY;
-
 		}
 		else if (cd_state == 1)
 		{
-
 			cd_var = t2;
 			cd_state = 2;
 
@@ -185,15 +128,6 @@ void cd_state_config()
 		}
 	}
 }
-
-/*
-void ports_config(uint8_t pl_val, uint8_t pc_val, uint8_t pa_val)
-{
-	PORTL = pl_val;
-	PORTC = pc_val;
-	PORTA = pa_val;
-}
-*/
 
 void lights_test(uint16_t inDly)
 {
@@ -311,8 +245,15 @@ void display_all()
 	else if (cd_state == 5)//<==== transition state
 	{
 		display(cd_var_last + t1, cd_var_last + t1, cd_var_last, cd_state);
+		
+		if (t1 != t4 || t2 != t5 || t3 != t6) // only update values if they changed
+		{
+			t1 = t4;
+			t2 = t5;
+			t3 = t6;
+		}
 	}
 
-	count_down_tmr();
-	cd_state_config();
+	count_down_tmr(); 
+	cd_state_config(); // count down state
 }
