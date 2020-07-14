@@ -1,20 +1,16 @@
 
-
-#define CYCLE_TIME 30
-#define SER_RD_TME 20
 #define MUX_DLY 3000
 #define CD_DLY 1000
-#define YELLOW_DLY 2
+#define YELLOW_DLY 1
 
-//uint16_t cd_delay = 1000;
 int t1 = 3, t2 = 4, t3 = 5, t4 = 8, t5 = 8, t6 = 8;
-int8_t inc = 0, cd_state = 0, location = 0, mux_state;
-uint32_t cycle_timer = 0, ser_rd_tmr = 0, cd_tmr, mux_tmr = 0;
+int8_t cd_state = 0, location = 0, mux_state;
+uint32_t cd_tmr, mux_tmr = 0;
 
 int cd_var = t1;
 int cd_var_last;
 
-boolean ser_avl = 0, num_place = 0;
+boolean num_place = 0;
 
 // Lights
 // port_val[state => 0 1 2 3 4 5 ][point => 0 1 2 (A B C)]
@@ -43,17 +39,15 @@ void setup()
 	PORTL = 0b00001111;
 	PORTC = 0xFF;
 	PORTA = 0;
-
-	cycle_timer = millis();
-	ser_rd_tmr = millis();
 	
 }
 
 void loop()
 {
+	//display(t1, t2, t3, 0); // only show received ti t2 t3 values, disable display all 
 
-	display_all();
-	ser_reader();
+	display_all(); // show count down timer and leds
+	ser_reader(); // read serial received values
 	
 }
 
@@ -193,8 +187,7 @@ void display(int ta, int tb, int tc, int8_t state_in)
 		{
 			seg_out(tc, num_place);
 			PORTL = portl_val[state_in][location];
-			
-			
+	
 		}
 
 		if (num_place)
