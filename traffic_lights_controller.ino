@@ -44,12 +44,14 @@ void setup()
 	DDRC = 0xFF;
 	DDRA = 0xFF;
 
-	//blink_nx(500, 3);
+	blink_nx(500, 3);
 
 	PORTL = 0b00001111; // 0-3 bits set 1
 	PORTC = 0xFF; // all bits set 1
 	PORTA = 0; // all bits set 0
-	//delay(500);
+	delay(500);
+	cd_tmr = millis();
+	mux_tmr = millis();
 }
 
 void loop()
@@ -260,8 +262,11 @@ void display_all(int8_t in_state)
 		display(-1, -1, -1, TIME_ONLY);
 	}
 
-	count_down_tmr();
-	cd_state_config(); // count down state
+	if (in_state < 6)
+	{
+		count_down_tmr();
+		cd_state_config(); // count down state
+	}
 }
 
 void blink_nx(uint16_t in_dly, uint8_t in_blnk)
